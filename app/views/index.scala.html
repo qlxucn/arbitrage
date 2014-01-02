@@ -1,7 +1,14 @@
 @(message: String)
 
+@import helpers.ApplicationHelper
+
 @main("Welcome to Play 2.1") {
-    
-    @play20.welcome(message)
-    
+    <div id="panel">
+        <p>Coinbase Price </p>
+        <div>@{ApplicationHelper.getCoinbaseRateInCNY}</div>
+        <p>OKCoin Price </p>
+        <div>@{ApplicationHelper.getOKCoinRateInCNY}</div>
+        <p>CNY Profit </p>
+        <div>@{ApplicationHelper.getCNYProfit}%</div>
+    </div>
 }
