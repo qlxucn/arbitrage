@@ -15,24 +15,71 @@ import play.api.libs.json.{Json, JsValue}
  * Time: 4:57 PM
  */
 object ApplicationHelper {
-  def getCNYProfit = {
-    val oc = getOKCoinRateInCNY.toDouble
-    val cb = getCoinbaseRateInCNY.toDouble
+  var usd_okcoin   = ""
+  var usd_coinbase = ""
+  var cny_okcoin   = ""
+  var cny_coinbase = ""
+  var usd_to_cny   = ""
+
+  def genData = {
+    usd_to_cny   = fetchExRate_Usd2Cny
+    cny_okcoin   = fetchCNY_OkCoin.toDouble.formatted("%1.3f")
+    usd_okcoin   = (cny_okcoin.toDouble / usd_to_cny.toDouble).formatted("%1.3f")
+    usd_coinbase = fetchUSD_CoinBase.toDouble.formatted("%1.3f")
+    cny_coinbase = (usd_coinbase.toDouble * usd_to_cny.toDouble).formatted("%1.3f")
+  }
+
+  def getProfit_Okcoin2Coinbase = {
+    val oc = usd_okcoin.toDouble
+    val cb = usd_coinbase.toDouble
     ((cb - oc) / oc * 100).formatted("%1.3f")
   }
 
-  def getOKCoinRateInCNY = {
+  def getProfit_Coinbase2Okcoin = {
+    val oc = usd_okcoin.toDouble
+    val cb = usd_coinbase.toDouble
+    ((oc - cb) / cb * 100).formatted("%1.3f")
+  }
+
+  def getExUsd2Cny   = usd_to_cny
+  def getCnyOkcoin   = cny_okcoin
+  def getUsdOkcoin   = usd_okcoin
+  def getCnyCoinbase = cny_coinbase
+  def getUsdCoinbase = usd_coinbase
+
+
+  def fetchCNY_OkCoin:String = {
+    def fetchRate(json:JsValue):Option[String] = {
+      (json \ "ticker" \ "last").asOpt[String]
+    }
+
     val uri = "https://www.okcoin.com/api/ticker.do"
 
-    getRate(uri, fetchJsonRateOkCoin)
+    getRate(uri, fetchRate)
   }
 
-  def getCoinbaseRateInCNY:String  = {
+  def fetchUSD_CoinBase:String  = {
+    def fetchRate(json:JsValue):Option[String] = {
+      (json \ "btc_to_usd").asOpt[String]
+    }
     val uri = "http://coinbase.com/api/v1/currencies/exchange_rates"
-    getRate(uri, fetchJsonRateCoinbase)
+    getRate(uri, fetchRate)
   }
 
-  def getRate(uri:String, fetchRateFunc:(JsValue)=>Option[String] ):String = {
+  def fetchExRate_Usd2Cny:String = {
+    val resp = httpGet("http://www.likeforex.com/currency-converter/us-dollar-usd_cny-chinese-yuan-renminbi.htm/1")
+    val rateRegex = "1 USD =(.*?)CNY".r
+
+    val g = rateRegex.findFirstMatchIn(resp)
+
+    if (g.nonEmpty) {
+     return g.get.group(1).trim
+    }
+
+    return null
+  }
+
+  private def getRate(uri:String, fetchRateFunc:(JsValue)=>Option[String] ):String = {
     val res = httpGet(uri)
     if (res == null) return null
 
@@ -54,15 +101,7 @@ object ApplicationHelper {
     }
   }
 
-  def fetchJsonRateCoinbase(json:JsValue):Option[String] = {
-    (json \ "btc_to_cny").asOpt[String]
-  }
-
-  def fetchJsonRateOkCoin(json:JsValue):Option[String] = {
-    (json \ "ticker" \ "last").asOpt[String]
-  }
-
-  def httpGet(uri:String): String = {
+  private def httpGet(uri:String): String = {
     val client = new DefaultHttpClient
     val method = new HttpGet(uri)
     val responseHandler = new BasicResponseHandler
@@ -80,5 +119,4 @@ object ApplicationHelper {
 
     response
   }
-
 }

@@ -3,12 +3,21 @@
 @import helpers.ApplicationHelper
 
 @main("Welcome to Play 2.1") {
-    <div id="panel">
-        <p>Coinbase Price </p>
-        <div>@{ApplicationHelper.getCoinbaseRateInCNY}</div>
-        <p>OKCoin Price </p>
-        <div>@{ApplicationHelper.getOKCoinRateInCNY}</div>
-        <p>CNY Profit </p>
-        <div>@{ApplicationHelper.getCNYProfit}%</div>
+    @ApplicationHelper.genData
+    <div id="pnl">
+        <div class="panel panel-default">
+            <div class="panel-heading">Price <span class="text-info">1 USD = @{ApplicationHelper.getExUsd2Cny} CNY</span></div>
+            <ul class="list-group">
+                <li class="list-group-item">Coinbase <span class="text-warning">￥@{ApplicationHelper.getCnyCoinbase} | $@{ApplicationHelper.getUsdCoinbase}</span></li>
+                <li class="list-group-item">OKCoin <span class="text-warning">￥@{ApplicationHelper.getCnyOkcoin} | $@{ApplicationHelper.getUsdOkcoin}</span></li>
+            </ul>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Margin</div>
+            <ul class="list-group">
+                <li class="list-group-item">OkCoin => CoinBase <span class="text-danger">@{ApplicationHelper.getProfit_Okcoin2Coinbase}%</span></li>
+                <li class="list-group-item">OkCoin <= CoinBase <span class="text-danger">@{ApplicationHelper.getProfit_Coinbase2Okcoin}%</span></li>
+            </ul>
+        </div>
     </div>
 }
