@@ -7,6 +7,9 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
 import play.Logger
 import play.api.libs.json.{Json, JsValue}
+import play.api.db.DB
+import org.joda.time.DateTime
+import models.Margin
 
 
 /**
@@ -46,6 +49,26 @@ object ApplicationHelper {
   def getUsdOkcoin   = usd_okcoin
   def getCnyCoinbase = cny_coinbase
   def getUsdCoinbase = usd_coinbase
+
+  def genAllDataForHighStock = {
+    val margins = Margin.all()
+    var okcoin_cny_data      = "["
+    var coinbase_cny_data    = "["
+    var okcoin2Coinbase_data = "["
+
+    margins.foreach { m =>
+      val millis = DateTime.parse(m.created_at).getMillis.toString
+      okcoin_cny_data      += s"[${millis}, ${m.okcoin_cny}], "
+      coinbase_cny_data    += s"[${millis}, ${m.coinbase_cny}], "
+      okcoin2Coinbase_data += s"[${millis}, ${m.okcoin2Coinbase}], "
+    }
+
+    okcoin_cny_data       += "]"
+    coinbase_cny_data     += "]"
+    okcoin2Coinbase_data  += "]"
+
+    (okcoin_cny_data, coinbase_cny_data, okcoin2Coinbase_data)
+  }
 
 
   def fetchCNY_OkCoin:String = {
