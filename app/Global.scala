@@ -17,7 +17,7 @@ object Global extends GlobalSettings {
     import play.api.libs.concurrent.Execution.Implicits._
     Akka.system.scheduler.schedule(
       FiniteDuration(0, TimeUnit.SECONDS),
-      FiniteDuration(5, TimeUnit.MINUTES),
+      FiniteDuration(10, TimeUnit.MINUTES),
 //      FiniteDuration(5, TimeUnit.SECONDS),
       actorRef, MarginMonitMsg("hi"))
 

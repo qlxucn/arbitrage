@@ -76,7 +76,7 @@ object ApplicationHelper {
       (json \ "ticker" \ "last").asOpt[String]
     }
 
-    val uri = "https://www.okcoin.com/api/ticker.do"
+    val uri = "http://www.okcoin.com/api/ticker.do"
 
     getRate(uri, fetchRate)
   }
