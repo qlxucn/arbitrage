@@ -122,7 +122,16 @@ object ApplicationHelper {
   }
 
   private def getRate(uri:String, fetchRateFunc:(JsValue)=>Option[String] ):String = {
-    val res = httpGet(uri)
+    var res:String = null
+
+    // Retry 5 times
+    (1 to 5).foreach{ i=>
+      if (res == null) {
+        res = httpGet(uri)
+      }
+    }
+
+    // fetch data failed
     if (res == null) return null
 
     try {
