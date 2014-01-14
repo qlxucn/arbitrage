@@ -1,4 +1,11 @@
 var draw = function(data) {
+    // Use UTC
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+    });
+
     // Create the chart
     $('#container').highcharts('StockChart', {
         rangeSelector : {

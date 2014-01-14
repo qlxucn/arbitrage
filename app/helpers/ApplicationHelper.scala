@@ -10,6 +10,7 @@ import play.api.libs.json.{Json, JsValue}
 import play.api.db.DB
 import org.joda.time.DateTime
 import models.Margin
+import org.apache.commons.lang3.StringUtils
 
 
 /**
@@ -18,6 +19,8 @@ import models.Margin
  * Time: 4:57 PM
  */
 object ApplicationHelper {
+  val logger = Logger.of(this.getClass)
+
   var usd_okcoin   = ""
   var usd_coinbase = ""
   var cny_okcoin   = ""
@@ -25,11 +28,15 @@ object ApplicationHelper {
   var usd_to_cny   = ""
 
   def genData = {
-    usd_to_cny   = fetchExRate_Usd2Cny
-    cny_okcoin   = fetchCNY_OkCoin.toDouble.formatted("%1.3f")
-    usd_okcoin   = (cny_okcoin.toDouble / usd_to_cny.toDouble).formatted("%1.3f")
-    usd_coinbase = fetchUSD_CoinBase.toDouble.formatted("%1.3f")
-    cny_coinbase = (usd_coinbase.toDouble * usd_to_cny.toDouble).formatted("%1.3f")
+    try {
+      usd_to_cny   = fetchExRate_Usd2Cny
+      cny_okcoin   = fetchCNY_OkCoin.toDouble.formatted("%1.3f")
+      usd_okcoin   = (cny_okcoin.toDouble / usd_to_cny.toDouble).formatted("%1.3f")
+      usd_coinbase = fetchUSD_CoinBase.toDouble.formatted("%1.3f")
+      cny_coinbase = (usd_coinbase.toDouble * usd_to_cny.toDouble).formatted("%1.3f")
+    } catch {
+      case ex:Exception => logger.error(ex.getMessage, ex)
+    }
   }
 
   def getProfit_Okcoin2Coinbase = {
@@ -78,7 +85,12 @@ object ApplicationHelper {
 
     val uri = "http://www.okcoin.com/api/ticker.do"
 
-    getRate(uri, fetchRate)
+    val rate = getRate(uri, fetchRate)
+    if (StringUtils.isBlank(rate)) {
+      logger.error(s"fetchCNY_OkCoin failed, rate=${rate}")
+    }
+
+    rate
   }
 
   def fetchUSD_CoinBase:String  = {
@@ -86,7 +98,13 @@ object ApplicationHelper {
       (json \ "btc_to_usd").asOpt[String]
     }
     val uri = "http://coinbase.com/api/v1/currencies/exchange_rates"
-    getRate(uri, fetchRate)
+
+    val rate = getRate(uri, fetchRate)
+    if (StringUtils.isBlank(rate)) {
+      logger.error(s"fetchUSD_CoinBase failed, rate=${rate}")
+    }
+
+    rate
   }
 
   def fetchExRate_Usd2Cny:String = {
@@ -99,6 +117,7 @@ object ApplicationHelper {
      return g.get.group(1).trim
     }
 
+    logger.error(s"fetchExRate_Usd2Cny failed")
     return null
   }
 
