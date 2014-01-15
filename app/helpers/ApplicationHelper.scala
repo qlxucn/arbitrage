@@ -122,34 +122,27 @@ object ApplicationHelper {
   }
 
   private def getRate(uri:String, fetchRateFunc:(JsValue)=>Option[String] ):String = {
-    var res:String = null
-
-    // Retry 5 times
     (1 to 5).foreach{ i=>
-      if (res == null) {
-        res = httpGet(uri)
+      try {
+        val res = httpGet(uri)
+        val json = Json.parse(res)
+        val rate = fetchRateFunc(json)
+
+        if (rate.isEmpty) {
+          throw new Exception("rate is empty")
+        } else {
+          return rate.get
+        }
+      } catch {
+        case e:Exception => {
+          if (i==5) {
+            Logger.error("Json parse error", e)
+          }
+        }
       }
     }
 
-    // fetch data failed
-    if (res == null) return null
-
-    try {
-      val json = Json.parse(res)
-      val rate = fetchRateFunc(json)
-
-      if (rate.isEmpty) {
-        return null
-      } else {
-        return rate.get
-      }
-
-    } catch {
-      case e:Exception => {
-        Logger.error("Json parse error", e)
-        return null
-      }
-    }
+    return null
   }
 
   private def httpGet(uri:String): String = {

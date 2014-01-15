@@ -15,6 +15,7 @@ object Global extends GlobalSettings {
   override def onStart(app: Application) {
     val actorRef = Akka.system.actorOf(Props[MarginMonitActor])
     import play.api.libs.concurrent.Execution.Implicits._
+
     Akka.system.scheduler.schedule(
       FiniteDuration(0, TimeUnit.SECONDS),
       FiniteDuration(10, TimeUnit.MINUTES),
