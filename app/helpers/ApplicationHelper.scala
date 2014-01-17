@@ -11,6 +11,7 @@ import play.api.db.DB
 import org.joda.time.DateTime
 import models.Margin
 import org.apache.commons.lang3.StringUtils
+import org.apache.http.params.{HttpConnectionParams, BasicHttpParams}
 
 
 /**
@@ -146,7 +147,11 @@ object ApplicationHelper {
   }
 
   private def httpGet(uri:String): String = {
-    val client = new DefaultHttpClient
+    val params = new BasicHttpParams
+    HttpConnectionParams.setConnectionTimeout(params, 20*1000)
+    HttpConnectionParams.setSoTimeout(params, 20*1000)
+
+    val client = new DefaultHttpClient(params)
     val method = new HttpGet(uri)
     val responseHandler = new BasicResponseHandler
 
