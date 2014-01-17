@@ -18,8 +18,8 @@ object Global extends GlobalSettings {
 
     Akka.system.scheduler.schedule(
       FiniteDuration(0, TimeUnit.SECONDS),
-      FiniteDuration(10, TimeUnit.MINUTES),
-//      FiniteDuration(5, TimeUnit.SECONDS),
+//      FiniteDuration(10, TimeUnit.MINUTES),
+      FiniteDuration(5, TimeUnit.SECONDS),
       actorRef, MarginMonitMsg("hi"))
 
     Logger.info("Application has started")
