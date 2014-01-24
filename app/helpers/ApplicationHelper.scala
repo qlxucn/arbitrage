@@ -12,6 +12,7 @@ import org.joda.time.DateTime
 import models.Margin
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.params.{HttpConnectionParams, BasicHttpParams}
+import helpers.ArbConstants._
 
 
 /**
@@ -58,8 +59,16 @@ object ApplicationHelper {
   def getCnyCoinbase = cny_coinbase
   def getUsdCoinbase = usd_coinbase
 
-  def genAllDataForHighStock = {
-    val margins = Margin.all()
+  def genDataForHighStock(duration:String) = {
+    var margins:List[Margin] = null
+
+    duration match {
+      case DURATION_ONE_DAY => margins = Margin.fromOneDay()
+      case DURATION_ONE_WEEK => margins = Margin.fromOneWeek()
+      case DURATION_ONE_MONTH => margins = Margin.fromOneMonth()
+      case _ => margins = Margin.fromOneDay()
+    }
+
     var okcoin_cny_data      = "["
     var coinbase_cny_data    = "["
     var okcoin2Coinbase_data = "["

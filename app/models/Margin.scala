@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import play.api.Play.current
 import play.api.db._
 import anorm.SqlParser._
+import org.joda.time.format.DateTimeFormat
 
 case class Margin(id: Long,
                   okcoin_cny: String,
@@ -18,6 +19,8 @@ case class Margin(id: Long,
                   created_at: String)
 
 object Margin {
+  val dfmSql = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+
   def margin = {
     get[Long]("id") ~
     get[String]("okcoin_cny") ~
@@ -36,6 +39,21 @@ object Margin {
 
   def all(): List[Margin] = DB.withConnection { implicit c =>
     SQL("select * from margin").as(margin *)
+  }
+
+  def fromOneDay(): List[Margin] = DB.withConnection { implicit c =>
+    val time = DateTime.now.minusDays(1).toString(dfmSql)
+    SQL(s"select * from margin where created_at > '${time}'").as(margin *)
+  }
+
+  def fromOneWeek(): List[Margin] = DB.withConnection { implicit c =>
+    val time = DateTime.now.minusWeeks(1).toString(dfmSql)
+    SQL(s"select * from margin where created_at > '${time}'").as(margin *)
+  }
+
+  def fromOneMonth(): List[Margin] = DB.withConnection { implicit c =>
+    val time = DateTime.now.minusMonths(1).toString(dfmSql)
+    SQL(s"select * from margin where created_at > '${time}'").as(margin *)
   }
 
   def create(okcoin_cny: String,

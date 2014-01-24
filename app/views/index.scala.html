@@ -1,6 +1,7 @@
-@(message: String)
+@(chart_duration: String)
 
 @import helpers.ApplicationHelper
+@import helpers.ArbConstants._
 
 @main("Welcome to Play 2.1") {
     @ApplicationHelper.genData
@@ -21,11 +22,16 @@
         </div>
     </div>
 
+    <ul class="nav nav-tabs">
+        <li><a href="@routes.Application.duration(DURATION_ONE_DAY)">One Day</a></li>
+        <li><a href="@routes.Application.duration(DURATION_ONE_WEEK)">One Week</a></li>
+        <li><a href="@routes.Application.duration(DURATION_ONE_MONTH)">One Month</a></li>
+    </ul>
     <div id="container" style="height: 500px; min-width: 310px"></div>
 
     <script src="@routes.Assets.at("javascripts/arbitrage/draw_chart.js")"></script>
     <script>
-        var d = @{ApplicationHelper.genAllDataForHighStock._3};
+        var d = @{ApplicationHelper.genDataForHighStock(chart_duration)._3}
         draw(d)
     </script>
 }
