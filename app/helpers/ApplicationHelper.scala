@@ -1,18 +1,15 @@
 package helpers
 
-import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.HttpPost
 import org.apache.http.impl.client.{BasicResponseHandler, DefaultHttpClient}
 import org.apache.http.client.methods.HttpGet
-import org.apache.http.util.EntityUtils
-import play.Logger
+import play.{Play, Logger}
 import play.api.libs.json.{Json, JsValue}
-import play.api.db.DB
 import org.joda.time.DateTime
 import models.Margin
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.params.{HttpConnectionParams, BasicHttpParams}
 import helpers.ArbConstants._
+import helpers.utils.EmailUtil
 
 
 /**
@@ -63,10 +60,11 @@ object ApplicationHelper {
     var margins:List[Margin] = null
 
     duration match {
-      case DURATION_ONE_DAY => margins = Margin.fromOneDay()
-      case DURATION_ONE_WEEK => margins = Margin.fromOneWeek()
-      case DURATION_ONE_MONTH => margins = Margin.fromOneMonth()
-      case _ => margins = Margin.fromOneDay()
+      case DURATION_ONE_HOUR => margins = Margin.fromOneHour
+      case DURATION_ONE_DAY => margins = Margin.fromOneDay
+      case DURATION_ONE_WEEK => margins = Margin.fromOneWeek
+      case DURATION_ONE_MONTH => margins = Margin.fromOneMonth
+      case _ => margins = Margin.fromOneDay
     }
 
     var okcoin_cny_data      = "["
@@ -176,5 +174,19 @@ object ApplicationHelper {
     }
 
     response
+  }
+
+  def makeDecision(ok2cb:Double, cb2ok:Double) = {
+    val thredOk2Cb = Play.application.configuration.getString("abr.threshold.ok2cb")
+    val thredCb2Ok = Play.application.configuration.getString("abr.threshold.cb2ok")
+
+    if (ok2cb > thredOk2Cb.toDouble ||
+        cb2ok > thredCb2Ok.toDouble) {
+
+      val subject = s"OK=>CB (${ok2cb}}), CB=>OK (${cb2ok}})"
+      val content = views.html.threshold_alert.render.toString
+      EmailUtil.sendEmail(subject, content)
+    }
+
   }
 }

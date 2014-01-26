@@ -37,21 +37,26 @@ object Margin {
   }
 
 
-  def all(): List[Margin] = DB.withConnection { implicit c =>
+  def all: List[Margin] = DB.withConnection { implicit c =>
     SQL("select * from margin").as(margin *)
   }
 
-  def fromOneDay(): List[Margin] = DB.withConnection { implicit c =>
+  def fromOneHour: List[Margin] = DB.withConnection { implicit c =>
+    val time = DateTime.now.minusHours(1).toString(dfmSql)
+    SQL(s"select * from margin where created_at > '${time}'").as(margin *)
+  }
+
+  def fromOneDay: List[Margin] = DB.withConnection { implicit c =>
     val time = DateTime.now.minusDays(1).toString(dfmSql)
     SQL(s"select * from margin where created_at > '${time}'").as(margin *)
   }
 
-  def fromOneWeek(): List[Margin] = DB.withConnection { implicit c =>
+  def fromOneWeek: List[Margin] = DB.withConnection { implicit c =>
     val time = DateTime.now.minusWeeks(1).toString(dfmSql)
     SQL(s"select * from margin where created_at > '${time}'").as(margin *)
   }
 
-  def fromOneMonth(): List[Margin] = DB.withConnection { implicit c =>
+  def fromOneMonth: List[Margin] = DB.withConnection { implicit c =>
     val time = DateTime.now.minusMonths(1).toString(dfmSql)
     SQL(s"select * from margin where created_at > '${time}'").as(margin *)
   }

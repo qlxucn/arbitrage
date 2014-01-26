@@ -3,7 +3,6 @@ package actor
 import akka.actor.{ActorLogging, Actor}
 import play.Logger
 import helpers.ApplicationHelper._
-import org.joda.time.DateTime
 import models.Margin
 
 /**
@@ -18,6 +17,7 @@ class MarginMonitActor extends Actor with ActorLogging{
 
       try {
         genData
+
         val cnyOkcoin              = getCnyOkcoin
         val usdOkcoin              = getUsdOkcoin
         val cnyCoinbase            = getCnyCoinbase
@@ -25,6 +25,7 @@ class MarginMonitActor extends Actor with ActorLogging{
         val profit_Okcoin2Coinbase = getProfit_Okcoin2Coinbase
         val profit_Coinbase2Okcoin = getProfit_Coinbase2Okcoin
         val exUsd2Cny              = getExUsd2Cny
+
         Margin.create(
           cnyOkcoin              ,
           usdOkcoin              ,
@@ -34,6 +35,7 @@ class MarginMonitActor extends Actor with ActorLogging{
           profit_Coinbase2Okcoin ,
           exUsd2Cny
         )
+
         Logger.info(
           s"okcoin_cny=${cnyOkcoin}, " +
             s"okcoin_usd=${usdOkcoin}, " +
@@ -42,6 +44,10 @@ class MarginMonitActor extends Actor with ActorLogging{
             s"Okcoin2Coinbase=${profit_Okcoin2Coinbase}, " +
             s"Coinbase2Okcoin=${profit_Coinbase2Okcoin}, " +
             s"exchange_rate=${exUsd2Cny}")
+
+        makeDecision(profit_Okcoin2Coinbase.toDouble,
+          profit_Coinbase2Okcoin.toDouble)
+
       } catch {
         case ex:Exception => {
           logger.error("MarginMonitActor has exception.", ex)
